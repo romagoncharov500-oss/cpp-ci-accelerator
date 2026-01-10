@@ -1,14 +1,19 @@
 #!/bin/bash
 set -e
 
-# Клонируем OpenCV (легковесно)
-git clone --depth 1 https://github.com/opencv/opencv.git opencv-src
+git clone --depth 1 https://github.com/opencv/opencv.git src
+cd src
 
-cd opencv-src
+# Определяем, включён ли ccache
+if command -v ccache &> /dev/null; then
+  CCACHE_LAUNCHER="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+else
+  CCACHE_LAUNCHER=""
+fi
 
-# Настраиваем и собираем
 cmake -B build \
   -DCMAKE_BUILD_TYPE=Release \
+  $CCACHE_LAUNCHER \
   -DBUILD_LIST=core,features2d,imgproc,calib3d \
   -DBUILD_EXAMPLES=OFF \
   -DBUILD_TESTS=OFF \
@@ -25,4 +30,9 @@ cmake -B build \
   -DWITH_OPENEXR=OFF \
   -DWITH_OPENJPEG=OFF
 
-time cmake --build build --parallel $(nproc || sysctl -n hw.logicalcpu)
+time cmake --build build --parallel $(nproc 2>/dev/null || sysctl -n hw.logicalcpu)
+
+if command -v ccache &> /dev/null; then
+  echo "=== ccache stats ==="
+  ccache -s
+fi
