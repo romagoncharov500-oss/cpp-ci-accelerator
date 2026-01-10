@@ -1,0 +1,3 @@
+[submodule "test-projects/opencv-minimal"]
+	path = test-projects/opencv-minimal
+	url = git@github.com:opencv/opencv.git
