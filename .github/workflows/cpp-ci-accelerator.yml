@@ -1,50 +1,27 @@
 name: C++ CI Accelerator Demo
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
 
 jobs:
   baseline:
-    name: 🐢 Baseline (no cache)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup build
-        run: |
-          sudo apt-get update && sudo apt-get install -y cmake g++
-
-      - name: Build OpenCV (baseline)
-        run: |
-          time ./scripts/build-opencv.sh
-        shell: bash
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: sudo apt-get update && sudo apt-get install -y cmake g++
+      - name: Build
+        run: time ./scripts/build-opencv.sh
 
   with-ccache:
-    name: 🚀 With ccache
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: sudo apt-get update && sudo apt-get install -y cmake g++ ccache
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: opencv-minimal-${{ github.sha }}
+          key: opencv-demo-v1
 
-      - name: Setup build
-        run: |
-          sudo apt-get update && sudo apt-get install -y cmake g++ ccache
-
-      - name: Configure ccache for CMake
-        run: |
-          echo "export CCACHE_CPP2=true" >> $GITHUB_ENV
-          echo "export PATH=/usr/lib/ccache:/usr/local/lib/ccache:$PATH" >> $GITHUB_ENV
-
-      - name: Build OpenCV (with ccache)
-        run: |
-          time ./scripts/build-opencv.sh
-        shell: bash
+      - name: Build with ccache
+        run: time ./scripts/build-opencv.sh
