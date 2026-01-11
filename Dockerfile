@@ -15,6 +15,7 @@ RUN apt-get update && \
         git \
         python3 \
         curl \
+        time \ 
     && rm -rf /var/lib/apt/lists/*
 
 # Добавляем ccache в PATH (приоритет над системными gcc/g++)
